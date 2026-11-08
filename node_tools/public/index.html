@@ -416,6 +416,129 @@
       display: inline-block;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TAB 3: TIKTOK SCENE ANALYZER */
+    .analyzer-header-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .analyzer-header-box h3 { font-size: 17px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .analyzer-header-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+    .video-meta-card {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .video-meta-info { flex: 1; }
+    .video-meta-title { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .video-meta-sub { font-size: 13px; color: var(--text-muted); display: flex; gap: 14px; flex-wrap: wrap; }
+    .video-meta-sub span { display: inline-flex; align-items: center; gap: 4px; }
+
+    .timeline-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .scene-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .scene-card:hover {
+      border-color: #3b82f6aa;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .scene-card.phase-hook { border-left: 5px solid #ef4444; }
+    .scene-card.phase-buildup { border-left: 5px solid #f59e0b; }
+    .scene-card.phase-climax { border-left: 5px solid #8b5cf6; }
+    .scene-card.phase-cta { border-left: 5px solid #10b981; }
+
+    .scene-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .scene-title-group { display: flex; align-items: center; gap: 10px; }
+    .scene-num {
+      background: #1e293b;
+      color: #38bdf8;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .scene-phase { font-size: 15px; font-weight: 700; color: #fff; }
+    .scene-timerange {
+      font-family: monospace;
+      font-size: 13px;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .scene-purpose {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      font-style: italic;
+    }
+
+    .scene-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .detail-block {
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .detail-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .detail-label.label-visual { color: #38bdf8; }
+    .detail-label.label-voice { color: #a78bfa; }
+    .detail-label.label-sfx { color: #fbbf24; }
+    .detail-label.label-capcut { color: #34d399; }
+    .detail-text { font-size: 13px; color: #e2e8f0; line-height: 1.5; }
+
+    .analyzer-action-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
 <body>
@@ -439,9 +562,9 @@
         <span class="icon">🔫</span>
         <span>Delta Force Hub</span>
       </li>
-      <li class="nav-item" onclick="openGameplayModal()">
-        <span class="icon">📁</span>
-        <span>Kho Gameplay Nền</span>
+      <li class="nav-item" id="nav-tiktok" onclick="switchTab('tiktok')">
+        <span class="icon">🔍</span>
+        <span>Phân Tích Video TikTok</span>
       </li>
     </ul>
 
@@ -474,6 +597,7 @@
         </div>
         <div class="btn-group">
           <button class="btn btn-secondary" onclick="openModal()">➕ Thêm Kịch Bản Mới</button>
+          <button class="btn btn-secondary" onclick="openGameplayModal()">📁 Kho Gameplay</button>
           <button class="btn btn-primary" id="btn-render-voice" onclick="renderAllAudio()">🎙️ Render Tất Cả Voice AI</button>
           <button class="btn btn-purple" id="btn-render-video" onclick="renderAllVideos()">🎬 Render Tất Cả Video MP4</button>
         </div>
@@ -603,11 +727,92 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label style="color:#38bdf8;">🎨 Chọn Mẫu Edit (TikTok / CapCut Template):</label>
+              <select id="wpn-template" class="form-control" style="border:1px solid #38bdf8; background:#0f172a; font-weight:600;">
+                <option value="split_screen" selected>Mẫu 1: Split-Screen 2 Tầng (Nửa trên Gameplay, Nửa dưới Bảng Phụ Kiện)</option>
+                <option value="floating_card">Mẫu 2: Full Gameplay + Thẻ Phụ Kiện Nổi (Floating Card)</option>
+                <option value="freeze_frame">Mẫu 3: Giữ Chân Chụp Màn Hình (Freeze & Screenshot Call)</option>
+              </select>
+            </div>
+
             <div style="margin-top: 10px; display:flex; gap:12px;">
               <button class="btn btn-cyan" id="btn-create-weapon-video" onclick="createWeaponVideoNow()" style="flex:1; justify-content:center; padding:12px; font-size:14px;">
                 🚀 Tạo Video Review Vũ Khí Này Ngay (Audio + Video MP4)
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: PHÂN TÍCH VIDEO TIKTOK (BÓC TÁCH PHÂN CẢNH) -->
+    <div class="tab-content" id="tab-tiktok">
+      <header class="tab-header">
+        <div>
+          <h1 style="font-size: 22px; font-weight: 800; display:flex; align-items:center; gap:8px;">
+            🔍 Phân Tích & Bóc Tách Phân Cảnh Video TikTok
+          </h1>
+          <p style="color:var(--text-muted); font-size:13px;">
+            Nhập link TikTok bất kỳ để bóc tách cấu trúc từng giây: Visual, Lời thoại Voice-over, Âm thanh SFX và Kỹ thuật dựng CapCut
+          </p>
+        </div>
+      </header>
+
+      <!-- URL Input & Quick Presets -->
+      <div class="analyzer-header-box">
+        <h3>🔗 Dán Đường Dẫn Video TikTok Cần Bóc Tách</h3>
+        <p>Hệ thống tự động giải mã cấu trúc 4 nhịp giữ chân: <strong>Hook (0-3s)</strong> ➔ <strong>Build-up (3-8s)</strong> ➔ <strong>Climax (8-14s)</strong> ➔ <strong>CTA & Loop</strong>.</p>
+        
+        <div class="url-input-row">
+          <input type="text" id="tiktokUrlInput" value="https://www.tiktok.com/@deltaforcegame/video/7389123456789012345-as-val-meta" placeholder="Dán link TikTok (VD: https://www.tiktok.com/@creator/video/...)">
+          <button class="btn btn-purple" id="btn-analyze-tiktok" onclick="analyzeTikTokUrl()">🔍 Bóc Tách Phân Cảnh</button>
+        </div>
+
+        <div class="quick-chips">
+          <span style="font-size: 12px; color:var(--text-muted);">Gợi ý link thịnh hành:</span>
+          <span class="chip" onclick="setQuickTikTokUrl('https://www.tiktok.com/@deltaforcegame/video/7389123456789012345-as-val-meta')">🔴 Review AS Val Meta (Delta Force)</span>
+          <span class="chip" onclick="setQuickTikTokUrl('https://www.tiktok.com/@fps_vietnam/video/7401928374829102-k416-laser-beam')">🟢 K416 Sấy Không Giật</span>
+          <span class="chip" onclick="setQuickTikTokUrl('https://www.tiktok.com/@gamer_pro/video/7412839485728192-m4a1-best-attachments')">🔵 M4A1 Bảng Build Phụ Kiện</span>
+          <span class="chip" onclick="setQuickTikTokUrl('https://www.tiktok.com/@short_tips/video/7423948572910293-scar-h-damage')">🟡 SCAR-H 1 Tap Solo</span>
+        </div>
+      </div>
+
+      <!-- Result Container -->
+      <div id="tiktokResultContainer" style="display:none;">
+        <!-- Overview Card -->
+        <div class="video-meta-card">
+          <div class="video-meta-info">
+            <div class="video-meta-title" id="tt-title">Review Vũ Khí AS Val Meta Sấy Không Giật</div>
+            <div class="video-meta-sub">
+              <span>👤 Kênh: <strong id="tt-author" style="color:#60a5fa;">@deltaforcegame</strong></span>
+              <span>⏱️ Thời lượng chuẩn: <strong id="tt-duration" style="color:#fbbf24;">16 giây</strong></span>
+              <span>🎯 Tổng phân cảnh: <strong id="tt-total-scenes" style="color:#34d399;">4 cảnh</strong></span>
+              <span>🔗 Link gốc: <a id="tt-link" href="#" target="_blank" style="color:var(--cyan); text-decoration:underline;">Mở TikTok ↗</a></span>
+            </div>
+          </div>
+          <button class="btn btn-success" onclick="cloneCurrentTikTokToStudio()">
+            ⚡ Clone Kịch Bản Vào Studio
+          </button>
+        </div>
+
+        <!-- Timeline Scenes -->
+        <h3 style="font-size: 17px; margin-bottom: 14px; display:flex; align-items:center; gap:8px;">
+          🎬 Chi Tiết Từng Phân Cảnh (Timeline Breakdown)
+        </h3>
+        <div class="timeline-container" id="scenesContainer">
+          <!-- Dynamically populated scene cards -->
+        </div>
+
+        <!-- Action Bar at Bottom -->
+        <div class="analyzer-action-bar">
+          <div>
+            <h4 style="font-size:15px; margin-bottom:4px; color:#fff;">✨ Muốn tái sử dụng công thức này?</h4>
+            <p style="font-size:13px; color:var(--text-muted);">Hệ thống sẽ chuyển toàn bộ kịch bản và visual cues này sang Video Studio để bạn render Audio & Video MP4 chỉ bằng 1 cú nhấp.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" onclick="copyFullRemixScript()">📋 Sao Chép Voice Text</button>
+            <button class="btn btn-primary" onclick="cloneCurrentTikTokToStudio()">⚡ Đưa Vào Video Studio Ngay</button>
           </div>
         </div>
       </div>
@@ -698,6 +903,7 @@
   <script>
     let allScripts = [];
     let currentCrawlData = null;
+    let currentTikTokData = null;
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -711,6 +917,10 @@
         document.getElementById('nav-delta').classList.add('active');
         // Tự động crawl nếu chưa có dữ liệu
         if (!currentCrawlData) crawlWeapon();
+      } else if (tab === 'tiktok') {
+        document.getElementById('tab-tiktok').classList.add('active');
+        document.getElementById('nav-tiktok').classList.add('active');
+        if (!currentTikTokData) analyzeTikTokUrl();
       }
     }
 
@@ -874,7 +1084,8 @@
         voice_text: document.getElementById('wpn-voice-text').value.trim(),
         visual_cues: document.getElementById('wpn-cues').value.trim(),
         voice_name: document.getElementById('wpn-voice-name').value,
-        speed: document.getElementById('wpn-speed').value
+        speed: document.getElementById('wpn-speed').value,
+        template: document.getElementById('wpn-template').value
       };
 
       try {
@@ -898,6 +1109,140 @@
         btn.disabled = false;
         btn.innerHTML = `🚀 Tạo Video Review Vũ Khí Này Ngay (Audio + Video MP4)`;
       }
+    }
+
+    // ==================== TIKTOK SCENE ANALYZER FUNCTIONS ====================
+    function setQuickTikTokUrl(url) {
+      document.getElementById('tiktokUrlInput').value = url;
+      analyzeTikTokUrl();
+    }
+
+    async function analyzeTikTokUrl() {
+      const url = document.getElementById('tiktokUrlInput').value.trim();
+      if (!url) {
+        showToast('Vui lòng nhập đường dẫn TikTok', 'error');
+        return;
+      }
+      const btn = document.getElementById('btn-analyze-tiktok');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Đang bóc tách...`;
+      showToast('🔍 Đang phân tích video TikTok & bóc tách từng phân cảnh...');
+
+      try {
+        const res = await fetch('/api/analyze-tiktok', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const json = await res.json();
+        if (json.success && json.breakdown) {
+          currentTikTokData = json;
+          displayTikTokBreakdown(json);
+          showToast(`✅ Đã bóc tách thành công: ${json.title}`);
+        } else {
+          showToast('❌ Lỗi: ' + (json.error || 'Không thể bóc tách'), 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối phân tích: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `🔍 Bóc Tách Phân Cảnh`;
+      }
+    }
+
+    function displayTikTokBreakdown(data) {
+      const b = data.breakdown;
+      document.getElementById('tiktokResultContainer').style.display = 'block';
+      document.getElementById('tt-title').innerText = data.title || b.title;
+      document.getElementById('tt-author').innerText = data.author || b.author;
+      document.getElementById('tt-duration').innerText = `${b.estimatedDuration} giây`;
+      document.getElementById('tt-total-scenes').innerText = `${b.totalScenes} phân cảnh`;
+      document.getElementById('tt-link').href = data.url;
+
+      const container = document.getElementById('scenesContainer');
+      const phaseClasses = ['phase-hook', 'phase-buildup', 'phase-climax', 'phase-cta'];
+
+      container.innerHTML = b.scenes.map((scene, idx) => {
+        const cls = phaseClasses[idx % phaseClasses.length];
+        return `
+          <div class="scene-card ${cls}">
+            <div class="scene-card-top">
+              <div class="scene-title-group">
+                <span class="scene-num">CẢNH ${scene.sceneNumber}</span>
+                <span class="scene-phase">${scene.phase}</span>
+              </div>
+              <span class="scene-timerange">⏱️ ${scene.timeRange}</span>
+            </div>
+            <div class="scene-purpose">🎯 <strong>Mục tiêu:</strong> ${scene.purpose}</div>
+
+            <div class="scene-details-grid">
+              <div class="detail-block">
+                <div class="detail-label label-visual">👁️ Visual & Hành Động Màn Hình</div>
+                <div class="detail-text">${scene.visual}</div>
+              </div>
+              <div class="detail-block">
+                <div class="detail-label label-voice">🎙️ Lời Thoại Voice-over</div>
+                <div class="detail-text" style="font-weight:600; color:#c4b5fd;">"${scene.audioSpeech}"</div>
+              </div>
+              <div class="detail-block">
+                <div class="detail-label label-sfx">🎵 Âm Thanh SFX & BGM</div>
+                <div class="detail-text">${scene.sfxAndMusic}</div>
+              </div>
+              <div class="detail-block">
+                <div class="detail-label label-capcut">✂️ Hiệu Ứng CapCut & Tip Dựng</div>
+                <div class="detail-text">${scene.capcutTips}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function cloneCurrentTikTokToStudio() {
+      if (!currentTikTokData || !currentTikTokData.breakdown) {
+        showToast('Chưa có dữ liệu TikTok nào để clone', 'error');
+        return;
+      }
+      const b = currentTikTokData.breakdown;
+      const cleanWpn = (b.weaponName || 'META').replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      const newVideoId = `TT_${cleanWpn}_${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const payload = {
+        video_id: newVideoId,
+        voice_name: 'vi-VN-NamMinhNeural',
+        speed: '+12%',
+        voice_text: b.fullRemixScript,
+        visual_cues: b.visualCues
+      };
+
+      try {
+        showToast('⚡ Đang đưa kịch bản vào Video Studio...');
+        const res = await fetch('/api/scripts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          showToast(`🎉 Đã thêm kịch bản "${newVideoId}" vào Video Studio!`);
+          await loadScripts();
+          switchTab('factory');
+        } else {
+          showToast('❌ Lỗi: ' + resData.error, 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi khi clone: ' + err.message, 'error');
+      }
+    }
+
+    function copyFullRemixScript() {
+      if (!currentTikTokData || !currentTikTokData.breakdown) return;
+      const text = currentTikTokData.breakdown.fullRemixScript;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Đã sao chép toàn bộ lời thoại vào Clipboard!');
+      }).catch(() => {
+        showToast('Đã chọn lời thoại, hãy nhấn Ctrl+C để sao chép.');
+      });
     }
 
     // Modal & Video functions

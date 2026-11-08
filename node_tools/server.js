@@ -8,6 +8,7 @@ const multer = require('multer');
 const config = require('./config');
 const { renderVideo } = require('./video_generator');
 const { scrapeGameWithWeapon } = require('./gamewith_crawler');
+const { analyzeTikTokVideo } = require('./tiktok_analyzer');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -237,7 +238,7 @@ app.post('/api/generate', async (req, res) => {
 // API: Tạo Video MP4 hoàn chỉnh từ Audio + Footage Gameplay (Cách 2)
 app.post('/api/generate-video', async (req, res) => {
   try {
-    const { video_id } = req.body;
+    const { video_id, template } = req.body;
     const rows = await readCsv(config.paths.inputCsv);
     const targetRows = video_id ? rows.filter(r => r.video_id === video_id) : rows;
 
@@ -265,13 +266,15 @@ app.post('/api/generate-video', async (req, res) => {
           voiceText: row.voice_text,
           visualCues: row.visual_cues,
           audioPath,
-          outputPath: videoPath
+          outputPath: videoPath,
+          template: template || 'split_screen'
         });
         results.push({
           video_id: row.video_id,
           status: 'success',
           size_mb: renderRes.sizeMb,
-          duration: renderRes.duration
+          duration: renderRes.duration,
+          template: renderRes.template
         });
       } catch (err) {
         results.push({
@@ -304,7 +307,7 @@ app.post('/api/crawl-weapon', async (req, res) => {
 // API: Tạo video từ vũ khí GameWith chỉ bằng 1 Click
 app.post('/api/create-weapon-video', async (req, res) => {
   try {
-    const { video_id, weapon_name, voice_text, visual_cues, voice_name, speed } = req.body;
+    const { video_id, weapon_name, voice_text, visual_cues, voice_name, speed, template } = req.body;
     if (!video_id || !voice_text) {
       return res.status(400).json({ success: false, error: 'Thiếu dữ liệu kịch bản.' });
     }
@@ -334,24 +337,43 @@ app.post('/api/create-weapon-video', async (req, res) => {
     newRow.status = 'ready_for_capcut';
     await writeCsv(config.paths.inputCsv, rows);
 
-    // 2. Tạo video MP4
+    // 2. Tạo video MP4 theo Template được chọn
+    const chosenTemplate = template || 'split_screen';
     const videoPath = path.join(outputVideoDir, `${newRow.video_id}.mp4`);
     const renderRes = await renderVideo({
       videoId: newRow.video_id,
+      weaponName: weapon_name,
       voiceText: newRow.voice_text,
       visualCues: newRow.visual_cues,
       audioPath,
-      outputPath: videoPath
+      outputPath: videoPath,
+      template: chosenTemplate
     });
 
     res.json({
       success: true,
-      message: `Đã tạo thành công Video Review cho ${weapon_name || video_id}!`,
+      message: `Đã tạo video review (${chosenTemplate}) cho ${weapon_name || video_id}!`,
       video_url: `/video/${newRow.video_id}.mp4?t=${Date.now()}`,
       size_mb: renderRes.sizeMb,
-      duration: renderRes.duration
+      duration: renderRes.duration,
+      template: chosenTemplate
     });
   } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: Phân tích bóc tách phân cảnh video TikTok
+app.post('/api/analyze-tiktok', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url || typeof url !== 'string' || !url.trim()) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp link TikTok hợp lệ.' });
+    }
+    const data = await analyzeTikTokVideo(url.trim());
+    res.json(data);
+  } catch (err) {
+    console.error('Lỗi phân tích TikTok:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
