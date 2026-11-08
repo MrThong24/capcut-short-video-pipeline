@@ -18,3 +18,4 @@ Thumbs.db
 
 # Large media files (optional to ignore heavy renders)
 output_video/*.jpg
+

@@ -5,36 +5,19 @@ const config = require('./config');
 const overlaysDir = path.resolve(__dirname, '..', 'assets', 'overlays');
 if (!fs.existsSync(overlaysDir)) fs.mkdirSync(overlaysDir, { recursive: true });
 
-async function downloadBestImage(urls, destPath) {
-  for (const url of urls) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      const arrayBuffer = await res.arrayBuffer();
-      const buf = Buffer.from(arrayBuffer);
-      // Ưu tiên ảnh có kích thước lớn (> 10KB) là ảnh súng/bản đồ phụ kiện
-      if (buf.byteLength > 8000) {
-        fs.writeFileSync(destPath, buf);
-        return { success: true, url, size: buf.byteLength };
-      }
-    } catch (err) {
-      console.error('Lỗi tải ảnh:', err.message);
+async function downloadFile(url, destPath) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    const buf = Buffer.from(arrayBuffer);
+    if (buf.byteLength > 2000) { // Bỏ qua icon quá nhỏ
+      fs.writeFileSync(destPath, buf);
+      return { success: true, path: destPath, size: buf.byteLength };
     }
+  } catch (err) {
+    console.error(`Lỗi tải ${url}:`, err.message);
   }
-
-  // Fallback tải ảnh đầu tiên nếu không có ảnh lớn
-  if (urls.length > 0) {
-    try {
-      const res = await fetch(urls[0]);
-      if (res.ok) {
-        const arrayBuffer = await res.arrayBuffer();
-        const buf = Buffer.from(arrayBuffer);
-        fs.writeFileSync(destPath, buf);
-        return { success: true, url: urls[0], size: buf.byteLength };
-      }
-    } catch (e) {}
-  }
-
   return null;
 }
 
@@ -49,28 +32,62 @@ async function scrapeGameWithWeapon(url = 'https://gamewith.jp/deltaforce/475463
   if (titleMatch) {
     weaponName = titleMatch[1].trim();
   }
+  const cleanId = weaponName.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
-  // 2. Tìm tất cả ảnh phụ kiện/vũ khí
-  const images = [];
-  const imgRegex = /data-original=["'](https:\/\/img\.gamewith\.jp\/img\/[a-zA-Z0-9]+\.png)["']/g;
-  let imgMatch;
-  while ((imgMatch = imgRegex.exec(html)) !== null) {
-    if (!images.includes(imgMatch[1])) {
-      images.push(imgMatch[1]);
+  // 2. Tìm tất cả các hash ảnh của bài viết
+  const hashes = [];
+  const hashRegex = /https:\/\/img\.gamewith\.jp\/img\/(?:original_)?([a-zA-Z0-9]{32})\.png/gi;
+  let m;
+  while ((m = hashRegex.exec(html)) !== null) {
+    const hash = m[1];
+    if (!hashes.includes(hash)) {
+      hashes.push(hash);
     }
   }
 
-  // 3. Thông số kỹ thuật
+  // 3. Tải tất cả các ảnh chất lượng cao (original_) về kho assets/overlays
+  const downloadedImages = [];
+  let index = 1;
+
+  for (const hash of hashes) {
+    const originalUrl = `https://img.gamewith.jp/img/original_${hash}.png`;
+    const fallbackUrl = `https://img.gamewith.jp/img/${hash}.png`;
+    const filename = `${cleanId}_img_${index}.png`;
+    const dest = path.join(overlaysDir, filename);
+
+    // Thử tải link original trước, nếu không được thì tải link thường
+    let dl = await downloadFile(originalUrl, dest);
+    if (!dl) {
+      dl = await downloadFile(fallbackUrl, dest);
+    }
+
+    if (dl) {
+      let label = `Ảnh Phụ Kiện #${index}`;
+      if (index === 1) label = '🎯 Bảng Build 1 (Operations - Chiến Dịch)';
+      else if (index === 2) label = '⚔️ Bảng Build 2 (Warfare - Chiến Tranh)';
+      else if (index === 3) label = '⚙️ Chi tiết bộ phận phụ kiện #1';
+      else if (index === 4) label = '⚙️ Chi tiết bộ phận phụ kiện #2';
+
+      downloadedImages.push({
+        index,
+        filename,
+        label,
+        sizeKb: Math.round(dl.size / 1024),
+        localPath: dest,
+        webUrl: `/overlays/${filename}?t=${Date.now()}`
+      });
+      index++;
+    }
+  }
+
+  // 4. Bảng thông số kỹ thuật
   const stats = {
     damage: '29',
     fireRate: '972',
     armorDamage: '48',
     range: '27m',
     magSize: '15',
-    soundRange: '100m',
-    control: '43',
-    handling: '62',
-    stability: '51'
+    soundRange: '100m'
   };
 
   const damageMatch = html.match(/基本ダメージ\s*<\/th>\s*<td>\s*(\d+)/i) || html.match(/基本ダメージ\s*(\d+)/i);
@@ -91,19 +108,11 @@ async function scrapeGameWithWeapon(url = 'https://gamewith.jp/deltaforce/475463
   const soundMatch = html.match(/銃声拡散距離\s*<\/th>\s*<td>\s*([^<]+)/i) || html.match(/銃声拡散距離\s*(\d+m?)/i);
   if (soundMatch) stats.soundRange = soundMatch[1].trim();
 
-  // 4. Tải ảnh chính về thư mục assets/overlays
-  const cleanId = weaponName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  const filename = `GUN_${cleanId}.png`;
-  const destPath = path.join(overlaysDir, filename);
-  
-  const dlRes = await downloadBestImage(images, destPath);
-  const localImageUrl = `/overlays/${filename}?t=${Date.now()}`;
+  // 5. Kịch bản TikTok bắt tai, ngắt nhịp đúng phong cách CapCut Creator
+  const videoId = `DF_${cleanId}_review`;
+  const voiceText = `Khẩu súng trường ${weaponName} trong Delta Force hiện tại bá đạo cỡ nào? Sở hữu tốc độ xả đạn lên tới ${stats.fireRate} viên một phút, sát thương giáp ${stats.armorDamage} điểm và tích hợp sẵn nòng giảm thanh. Điểm yếu duy nhất là băng đạn mặc định chỉ 15 viên. Đây là hai bảng build phụ kiện chuẩn meta cho cả chế độ Chiến Dịch và Chiến Tranh giúp anh em sấy đầm tay triệt tiêu giật ngang, nhớ lưu lại video kẻo quên nhé!`;
 
-  // 5. Sinh kịch bản voice tiếng Việt ngắn gọn, cuốn hút
-  const videoId = `DF_${cleanId}_meta`;
-  const voiceText = `Đánh giá sức mạnh khẩu súng ${weaponName} trong Delta Force. Với tốc độ xả đạn lên tới ${stats.fireRate} viên một phút, sát thương giáp ${stats.armorDamage} điểm và tầm bắn hiệu quả ${stats.range}, đây là nỗi khiếp sợ ở cự ly tầm gần. Khẩu súng này tích hợp sẵn nòng giảm thanh giúp hạn chế lộ vị trí trên bản đồ. Nhược điểm duy nhất là băng đạn mặc định chỉ có ${stats.magSize} viên, anh em bắt buộc phải nâng cấp băng đạn mở rộng và tay cầm kiểm soát độ giật để sấy đầm tay nhất nhé!`;
-
-  const visualCues = `0s: Ảnh thông số ${weaponName} | 4s: Tốc độ xả đạn ${stats.fireRate} RPM | 8s: Phụ kiện khuyên dùng | 14s: Highlight sấy tầm gần`;
+  const visualCues = `0s: Hook khẩu ${weaponName} | 4s: Build 1 Operations giảm giật | 10s: Build 2 Warfare sấy tầm trung | 15s: Kêu gọi lưu video`;
 
   return {
     success: true,
@@ -111,8 +120,7 @@ async function scrapeGameWithWeapon(url = 'https://gamewith.jp/deltaforce/475463
     videoId,
     url,
     stats,
-    images,
-    localImageUrl,
+    images: downloadedImages,
     voiceText,
     visualCues,
     recommendedVoice: 'vi-VN-NamMinhNeural',

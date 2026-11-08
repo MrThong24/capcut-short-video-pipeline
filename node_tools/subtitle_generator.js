@@ -9,43 +9,31 @@ function formatAssTime(seconds) {
   return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
 }
 
-function generateAssPackage({ videoId, voiceText, visualCues, totalDuration, outputPath }) {
-  // Tiêu đề dựa theo ID
-  let title = 'GAMEPLAY SHORT REVIEW';
-  let cardTitle = 'THÔNG TIN CHI TIẾT';
-  let cardLines = [];
-
-  if (videoId.toUpperCase().includes('DF') || videoId.toUpperCase().includes('K416')) {
-    title = '🔥 DELTA FORCE - K416 META 🔥';
-    cardTitle = '⚡ THÔNG SỐ VŨ KHÍ ⚡';
-    cardLines = [
-      '• Triệt tiêu độ giật ngang: -35%',
-      '• Tốc độ ngắm bắn ADS: +25%',
-      '• Khẩu súng trường quốc dân cực bá'
-    ];
-  } else if (videoId.toUpperCase().includes('VLTK') || videoId.toUpperCase().includes('NGAMI')) {
-    title = '⚔️ VÕ LÂM 1 - NGA MI KIẾM PHÁI ⚔️';
-    cardTitle = '💎 TRANG BỊ ĐAI LƯNG THỦY 💎';
-    cardLines = [
-      '• Sinh lực cực đại: +320 điểm',
-      '• Kháng tất cả thuộc tính: +28%',
-      '• Làm chậm đối phương khi Tống Kim'
-    ];
+function generateAssPackage({ videoId, weaponName, voiceText, visualCues, totalDuration, outputPath, hasCustomImages = false }) {
+  let title = '🔥 DELTA FORCE - WEAPON META 🔥';
+  if (weaponName) {
+    title = `🔥 DELTA FORCE - ${weaponName.toUpperCase()} META 🔥`;
+  } else if (videoId.toUpperCase().includes('VLTK')) {
+    title = '⚔️ VÕ LÂM 1 - ĐÁNH GIÁ TRANG BỊ ⚔️';
   } else if (videoId.toUpperCase().includes('MEME')) {
     title = '😂 GÓC HÀI HƯỚNG VLTK1 😂';
-    cardTitle = '💀 ĐẬP ĐỒ HUYỀN TINH CẤP 8 💀';
-    cardLines = [
-      '• Dồn hết tiền tiết kiệm mua đá',
-      '• Tỷ lệ thành công: 90%',
-      '• Kết quả: XỊT TOÀN TẬP - XÓA GAME!'
-    ];
-  } else if (visualCues) {
-    title = `🎬 ${videoId.toUpperCase()}`;
-    cardTitle = '📌 MỤC TIÊU VIDEO';
-    cardLines = visualCues.split('|').map(c => `• ${c.trim()}`);
   }
 
-  // Tách kịch bản thành các câu phụ đề ngắn (style TikTok)
+  const allDurationStr = formatAssTime(totalDuration);
+  const midPoint = totalDuration / 2;
+  const midPointStr = formatAssTime(midPoint);
+
+  let headerEvents = '';
+  // Tiêu đề chính trên đỉnh
+  headerEvents += `Dialogue: 2,0:00:00.00,${allDurationStr},TitleStyle,,0,0,0,,${title}\n`;
+
+  if (hasCustomImages) {
+    // Nếu có ảnh bảng build, hiện nhãn tên build ngay trên đầu ảnh
+    headerEvents += `Dialogue: 2,0:00:00.00,${midPointStr},LabelStyle,,0,0,0,,🎯 BẢNG BUILD 1: CHIẾN DỊCH (OPERATIONS)\n`;
+    headerEvents += `Dialogue: 2,${midPointStr},${allDurationStr},LabelStyle,,0,0,0,,⚔️ BẢNG BUILD 2: CHIẾN TRANH (WARFARE)\n`;
+  }
+
+  // Tách phụ đề TikTok
   const rawWords = voiceText.trim().split(/\s+/);
   const chunks = [];
   let currentChunk = [];
@@ -74,14 +62,6 @@ function generateAssPackage({ videoId, voiceText, visualCues, totalDuration, out
     currentTime += chunkDuration;
   }
 
-  // Tiêu đề trên cùng (hiện suốt video)
-  const allDurationStr = formatAssTime(totalDuration);
-  const titleEvent = `Dialogue: 2,0:00:00.00,${allDurationStr},TitleStyle,,0,0,0,,${title}\n`;
-
-  // Thẻ thông tin ở giữa (hiện từ giây 2 đến hết video)
-  const cardText = `{\\b1}${cardTitle}{\\b0}\\N\\N${cardLines.join('\\N')}`;
-  const cardEvent = `Dialogue: 0,0:00:02.00,${allDurationStr},CardStyle,,0,0,0,,${cardText}\n`;
-
   const assContent = `[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -89,14 +69,13 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: TitleStyle,Segoe UI,54,&H0000FFFF,&H000000FF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,5,2,8,60,60,260,1
-Style: CardStyle,Segoe UI,46,&H00FFFFFF,&H000000FF,&H00111111,&H90000000,1,0,0,0,100,100,0,0,1,4,3,5,80,80,0,1
-Style: SubtitleStyle,Segoe UI,58,&H0000E5FF,&H000000FF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,6,2,2,60,60,420,1
+Style: TitleStyle,Segoe UI,54,&H0000FFFF,&H000000FF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,5,2,8,60,60,220,1
+Style: LabelStyle,Segoe UI,40,&H0038BDF8,&H000000FF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,4,1,8,60,60,330,1
+Style: SubtitleStyle,Segoe UI,58,&H0000E5FF,&H000000FF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,6,2,2,60,60,380,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-${titleEvent}
-${cardEvent}
+${headerEvents}
 ${subtitleEvents}
 `;
 
