@@ -1,0 +1,19 @@
+{
+  "name": "capcut-short-video-pipeline",
+  "version": "1.0.0",
+  "description": "Batch short-video automation pipeline for CapCut Desktop",
+  "scripts": {
+    "start": "node node_tools/tts_runner.js",
+    "web": "node node_tools/server.js",
+    "tts": "node node_tools/tts_runner.js",
+    "tts:force": "node node_tools/tts_runner.js --force"
+  },
+  "keywords": [
+    "capcut",
+    "tts",
+    "automation",
+    "web-studio"
+  ],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CapCut Video Factory - Studio Tự Động Hóa Kịch Bản & Delta Force Weapon Hub</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --sidebar-bg: #111726;
+      --card-bg: #151b2b;
+      --card-border: #232c42;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --purple: #8b5cf6;
+      --purple-bg: rgba(139, 92, 246, 0.15);
+      --cyan: #06b6d4;
+      --cyan-bg: rgba(6, 182, 212, 0.15);
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--card-border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+    .brand-icon {
+      font-size: 24px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+    }
+    .brand h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand span { font-size: 11px; color: var(--text-muted); display: block; }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .nav-item.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .nav-item .icon { font-size: 18px; }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--card-border);
+      padding-top: 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Main Content Area */
+    main.content {
+      margin-left: 250px;
+      flex: 1;
+      padding: 32px 40px;
+      max-width: 1300px;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Header & Stats (Tab 1) */
+    header.tab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 24px;
+    }
+    .stats-bar { display: flex; gap: 14px; }
+    .stat-badge {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stat-badge strong { font-size: 16px; }
+
+    /* Actions Bar */
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .search-box { flex: 1; min-width: 280px; max-width: 360px; }
+    .search-box input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-purple { background: var(--purple); color: #fff; }
+    .btn-purple:hover { background: #7c3aed; }
+    .btn-cyan { background: var(--cyan); color: #000; font-weight: 700; }
+    .btn-cyan:hover { background: #0891b2; color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-secondary { background: #242e42; color: #fff; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* Video List Cards (Tab 1) */
+    .card-list { display: flex; flex-direction: column; gap: 16px; }
+    .video-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 210px 1fr 340px;
+      gap: 20px;
+      align-items: center;
+      transition: border-color 0.2s;
+    }
+    .video-card:hover { border-color: #3b82f688; }
+    .col-info .video-id { font-size: 15px; font-weight: 700; color: #60a5fa; font-family: monospace; margin-bottom: 6px; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .tag-voice { background: #2e1065; color: #c4b5fd; }
+    .tag-speed { background: #1e3a8a; color: #93c5fd; margin-left: 4px; }
+    .col-content .voice-text {
+      font-size: 14px;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .col-content .visual-cues {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #0b0f19;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border-left: 3px solid var(--purple);
+    }
+    .col-media { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+    .badges-row { display: flex; gap: 8px; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-ready { background: var(--success-bg); color: var(--success); }
+    .badge-video { background: var(--purple-bg); color: #c084fc; border: 1px solid #c084fc44; }
+    .badge-pending { background: var(--warning-bg); color: var(--warning); }
+    audio { width: 100%; height: 32px; outline: none; filter: invert(0.85) hue-rotate(180deg); }
+    .card-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+    /* TAB 2: DELTA FORCE WEAPON HUB */
+    .crawler-search-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .crawler-search-box h3 { font-size: 17px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .crawler-search-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .url-input-row { display: flex; gap: 12px; margin-bottom: 14px; }
+    .url-input-row input {
+      flex: 1;
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .url-input-row input:focus { border-color: var(--cyan); }
+    .quick-chips { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+    .chip:hover { border-color: var(--cyan); color: #fff; }
+
+    /* Weapon Result View */
+    .weapon-detail-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+    }
+    .weapon-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .weapon-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .weapon-img-box {
+      background: #0b0f19;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      border: 1px solid var(--card-border);
+    }
+    .weapon-img-box img {
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+    }
+    .stats-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-item {
+      background: #0b0f19;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border-left: 3px solid var(--cyan);
+    }
+    .stat-item .stat-label { font-size: 11px; color: var(--text-muted); }
+    .stat-item .stat-val { font-size: 16px; font-weight: 700; color: #fff; }
+
+    .script-builder-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .script-builder-card h3 { font-size: 17px; }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      width: 620px;
+      max-width: 92vw;
+      padding: 24px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #cbd5e1; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-control {
+      width: 100%;
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--primary); }
+    textarea.form-control { min-height: 110px; resize: vertical; }
+
+    .video-modal-content {
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      width: 420px;
+      max-width: 90vw;
+      text-align: center;
+    }
+    .video-player-wrapper video {
+      width: 100%;
+      max-height: 70vh;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--card-border);
+      padding: 12px 20px;
+      border-radius: 8px;
+      display: none;
+      z-index: 1000;
+      font-size: 14px;
+    }
+    #toast.show { display: block; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .spinner {
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h2>CapCut Factory</h2>
+        <span>Automation Studio v2.0</span>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li class="nav-item active" id="nav-factory" onclick="switchTab('factory')">
+        <span class="icon">🎬</span>
+        <span>Video Studio</span>
+      </li>
+      <li class="nav-item" id="nav-delta" onclick="switchTab('delta')">
+        <span class="icon">🔫</span>
+        <span>Delta Force Hub</span>
+      </li>
+      <li class="nav-item" onclick="openGameplayModal()">
+        <span class="icon">📁</span>
+        <span>Kho Gameplay Nền</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span>CapCut Short-Video Pipeline</span><br>
+      <span style="color:#64748b;">Node.js • Edge TTS • FFmpeg</span>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEW -->
+  <main class="content">
+
+    <!-- TAB 1: VIDEO STUDIO (GIỮ NGUYÊN 100% TÍNH NĂNG) -->
+    <div class="tab-content active" id="tab-factory">
+      <header class="tab-header">
+        <div>
+          <h1 style="font-size: 22px; font-weight: 800;">🎬 Quản Lý Kịch Bản & Render Video</h1>
+          <p style="color:var(--text-muted); font-size:13px;">Dây chuyền sản xuất video ngắn hàng loạt kết hợp Voice AI & CapCut</p>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-badge">Kịch bản: <strong id="stat-total" style="color:var(--primary);">0</strong></div>
+          <div class="stat-badge">Voice MP3: <strong id="stat-audio" style="color:var(--success);">0</strong></div>
+          <div class="stat-badge">Video MP4: <strong id="stat-video" style="color:#c084fc;">0</strong></div>
+        </div>
+      </header>
+
+      <div class="actions-bar">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Tìm kịch bản, súng, trang bị..." oninput="filterVideos()">
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="openModal()">➕ Thêm Kịch Bản Mới</button>
+          <button class="btn btn-primary" id="btn-render-voice" onclick="renderAllAudio()">🎙️ Render Tất Cả Voice AI</button>
+          <button class="btn btn-purple" id="btn-render-video" onclick="renderAllVideos()">🎬 Render Tất Cả Video MP4</button>
+        </div>
+      </div>
+
+      <div class="card-list" id="videoList">
+        <div style="text-align:center; padding: 40px; color:var(--text-muted);">Đang tải dữ liệu...</div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DELTA FORCE WEAPON HUB (TÍNH NĂNG MỚI GAMEWITH) -->
+    <div class="tab-content" id="tab-delta">
+      <header class="tab-header">
+        <div>
+          <h1 style="font-size: 22px; font-weight: 800; display:flex; align-items:center; gap:8px;">
+            🔫 Delta Force Weapon Intelligence Hub
+          </h1>
+          <p style="color:var(--text-muted); font-size:13px;">
+            Tự động cào dữ liệu, thông số, ảnh phụ kiện từ GameWith và sinh video review 1-Click
+          </p>
+        </div>
+      </header>
+
+      <!-- URL Input & Chips -->
+      <div class="crawler-search-box">
+        <h3>🌐 Nhập Link Chi Tiết Vũ Khí Trên GameWith.jp</h3>
+        <p>Hệ thống sẽ dịch và tóm tắt thông số (sát thương, tốc độ bắn, phụ kiện khuyên dùng) thành kịch bản review tiếng Việt.</p>
+        
+        <div class="url-input-row">
+          <input type="text" id="gamewithUrl" value="https://gamewith.jp/deltaforce/475463" placeholder="Nhập đường dẫn trang vũ khí GameWith...">
+          <button class="btn btn-cyan" id="btn-crawl" onclick="crawlWeapon()">🔍 Quét & Tóm Tắt Vũ Khí</button>
+        </div>
+
+        <div class="quick-chips">
+          <span style="font-size: 12px; color:var(--text-muted);">Gợi ý súng hot:</span>
+          <span class="chip" onclick="setQuickUrl('https://gamewith.jp/deltaforce/475463')">🔴 AS Val (Link của bạn)</span>
+          <span class="chip" onclick="setQuickUrl('https://gamewith.jp/deltaforce/475454')">🟢 K416</span>
+          <span class="chip" onclick="setQuickUrl('https://gamewith.jp/deltaforce/475453')">🔵 M4A1</span>
+          <span class="chip" onclick="setQuickUrl('https://gamewith.jp/deltaforce/475455')">🟡 SCAR-H</span>
+          <span class="chip" onclick="setQuickUrl('https://gamewith.jp/deltaforce/475459')">🟣 MP5</span>
+        </div>
+      </div>
+
+      <!-- Result Container -->
+      <div id="weaponResultContainer" style="display:none;">
+        <div class="weapon-detail-grid">
+          <!-- Col 1: Card Thống kê & Ảnh -->
+          <div class="weapon-card">
+            <div class="weapon-card-header">
+              <h2 id="wpn-name" style="font-size: 20px; color:#38bdf8;">AS Val</h2>
+              <a id="wpn-source" href="#" target="_blank" style="font-size: 12px; color:var(--text-muted);">Xem trên GameWith ↗</a>
+            </div>
+
+            <div class="weapon-img-box">
+              <img id="wpn-img" src="" alt="Weapon Image">
+              <p style="font-size: 11px; color:#10b981; margin-top:8px;">✅ Đã tự động tải ảnh vào assets/overlays</p>
+            </div>
+
+            <div class="stats-table">
+              <div class="stat-item">
+                <div class="stat-label">Sát thương cơ bản</div>
+                <div class="stat-val" id="wpn-dmg">29</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Tốc độ xả đạn (RPM)</div>
+                <div class="stat-val" id="wpn-rpm" style="color:#f59e0b;">972</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Sát thương giáp</div>
+                <div class="stat-val" id="wpn-armor">48</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Tầm bắn tối ưu</div>
+                <div class="stat-val" id="wpn-range">27m</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Băng đạn mặc định</div>
+                <div class="stat-val" id="wpn-mag">15 viên</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Bán kính tiếng súng</div>
+                <div class="stat-val" id="wpn-sound">100m (Giảm thanh)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Col 2: Kịch bản sinh tự động & Nút Render 1-Click -->
+          <div class="script-builder-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3>🎙️ Kịch Bản Review Tự Động Tạo Cho TikTok / Shorts</h3>
+              <span class="tag tag-voice">Chuẩn Short Video</span>
+            </div>
+
+            <div class="form-group">
+              <label>Mã Video (ID):</label>
+              <input type="text" id="wpn-videoid" class="form-control" style="font-family:monospace;">
+            </div>
+
+            <div class="form-group">
+              <label>Lời thoại Voice AI (Đã tóm tắt từ GameWith - Có thể sửa theo ý bạn):</label>
+              <textarea id="wpn-voice-text" class="form-control" style="min-height: 120px;" oninput="updateWpnWordCount()"></textarea>
+              <div class="char-count" id="wpnWordCount">0 từ (~0 giây)</div>
+            </div>
+
+            <div class="form-group">
+              <label>Visual Cues (Gợi ý kéo thả Timeline CapCut):</label>
+              <input type="text" id="wpn-cues" class="form-control">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Giọng đọc:</label>
+                <select id="wpn-voice-name" class="form-control">
+                  <option value="vi-VN-NamMinhNeural">Nam Minh (Giọng Nam trầm, chuẩn Review súng)</option>
+                  <option value="vi-VN-HoaiMyNeural">Hoài My (Giọng Nữ truyền cảm)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tốc độ đọc:</label>
+                <select id="wpn-speed" class="form-control">
+                  <option value="+10%">Chuẩn (+10%)</option>
+                  <option value="+12%" selected>Cuốn hút (+12%)</option>
+                  <option value="+15%">Nhanh dứt khoát (+15%)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top: 10px; display:flex; gap:12px;">
+              <button class="btn btn-cyan" id="btn-create-weapon-video" onclick="createWeaponVideoNow()" style="flex:1; justify-content:center; padding:12px; font-size:14px;">
+                🚀 Tạo Video Review Vũ Khí Này Ngay (Audio + Video MP4)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODALS -->
+  <!-- Modal Thêm Kịch Bản -->
+  <div class="modal-overlay" id="scriptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Thêm Kịch Bản Mới</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <form id="scriptForm" onsubmit="saveScript(event)">
+        <div class="form-group">
+          <label>Mã Video (ID duy nhất):</label>
+          <input type="text" id="inputVideoId" class="form-control" placeholder="VD: DF_M4A1_custom" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Giọng đọc AI:</label>
+            <select id="inputVoice" class="form-control">
+              <option value="vi-VN-NamMinhNeural">Nam Minh (Nam trầm ấm)</option>
+              <option value="vi-VN-HoaiMyNeural">Hoài My (Nữ truyền cảm)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tốc độ đọc:</label>
+            <select id="inputSpeed" class="form-control">
+              <option value="+10%" selected>Chuẩn (+10%)</option>
+              <option value="+12%">Cuốn hút (+12%)</option>
+              <option value="+15%">Nhanh (+15%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Nội dung Kịch bản Voice:</label>
+          <textarea id="inputText" class="form-control" placeholder="Nhập lời thoại..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Visual Cues:</label>
+          <input type="text" id="inputCues" class="form-control" placeholder="VD: 0s: Gameplay | 5s: Meme">
+        </div>
+        <div style="display:flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" id="btn-save">Lưu Kịch Bản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Xem Video MP4 -->
+  <div class="modal-overlay" id="videoModal">
+    <div class="video-modal-content">
+      <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px;">
+        <h3 id="videoModalTitle" style="font-size: 16px;">Xem Video MP4</h3>
+        <button class="close-btn" onclick="closeVideoModal()">&times;</button>
+      </div>
+      <div class="video-player-wrapper">
+        <video id="playerVideo" controls autoplay loop playsinline></video>
+      </div>
+      <div style="margin-top: 14px;">
+        <a id="downloadVideoBtn" class="btn btn-purple btn-sm" download>⬇️ Tải Video MP4 Về Máy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Quản Lý Footage Gameplay -->
+  <div class="modal-overlay" id="gameplayModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📁 Quản Lý Video Gameplay Nền</h2>
+        <button class="close-btn" onclick="closeGameplayModal()">&times;</button>
+      </div>
+      <div class="gameplay-box" style="border: 2px dashed var(--card-border); padding:20px; text-align:center; margin-bottom:14px; cursor:pointer;" onclick="document.getElementById('fileUploadInput').click()">
+        <p style="font-size: 24px;">📤</p>
+        <p style="font-weight:600;">Nhấp để tải lên video Gameplay (.mp4)</p>
+        <input type="file" id="fileUploadInput" accept="video/mp4,video/mov,video/mkv" style="display:none;" onchange="uploadGameplayFile(event)">
+      </div>
+      <div id="gameplayFileList"></div>
+    </div>
+  </div>
+
+  <div id="toast">Thông báo</div>
+
+  <script>
+    let allScripts = [];
+    let currentCrawlData = null;
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      if (tab === 'factory') {
+        document.getElementById('tab-factory').classList.add('active');
+        document.getElementById('nav-factory').classList.add('active');
+      } else if (tab === 'delta') {
+        document.getElementById('tab-delta').classList.add('active');
+        document.getElementById('nav-delta').classList.add('active');
+        // Tự động crawl nếu chưa có dữ liệu
+        if (!currentCrawlData) crawlWeapon();
+      }
+    }
+
+    async function loadScripts() {
+      try {
+        const res = await fetch('/api/scripts');
+        const data = await res.json();
+        if (data.success) {
+          allScripts = data.data;
+          renderList(allScripts);
+          updateStats(allScripts);
+        }
+      } catch (err) {
+        showToast('Lỗi khi tải dữ liệu: ' + err.message, 'error');
+      }
+    }
+
+    function updateStats(items) {
+      document.getElementById('stat-total').innerText = items.length;
+      document.getElementById('stat-audio').innerText = items.filter(i => i.has_audio).length;
+      document.getElementById('stat-video').innerText = items.filter(i => i.has_video).length;
+    }
+
+    function renderList(items) {
+      const container = document.getElementById('videoList');
+      if (items.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 60px; color:var(--text-muted);">Chưa có kịch bản nào.</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const voiceShort = item.voice_name && item.voice_name.includes('HoaiMy') ? 'Hoài My (Nữ)' : 'Nam Minh (Nam)';
+        const audioBadge = item.has_audio ? `<span class="badge badge-ready">🎙️ ${item.audio_size_kb || 0} KB</span>` : `<span class="badge badge-pending">Chưa có audio</span>`;
+        const videoBadge = item.has_video ? `<span class="badge badge-video">🎬 Video MP4</span>` : '';
+
+        const audioPlayerHtml = item.has_audio && item.audio_url
+          ? `<audio controls src="${item.audio_url}" preload="none"></audio>`
+          : `<div style="font-size:12px; color:var(--text-muted);">Chưa tạo audio MP3</div>`;
+
+        let videoActionBtn = item.has_video && item.video_url
+          ? `<button class="btn btn-purple btn-sm" onclick="watchVideo('${item.video_id}', '${item.video_url}')">▶️ Xem Video</button>`
+          : `<button class="btn btn-purple btn-sm" onclick="renderSingleVideo('${item.video_id}')">🎬 Tạo Video</button>`;
+
+        return `
+          <div class="video-card">
+            <div class="col-info">
+              <div class="video-id">${item.video_id}</div>
+              <div>
+                <span class="tag tag-voice">${voiceShort}</span>
+                <span class="tag tag-speed">${item.speed || '+10%'}</span>
+              </div>
+            </div>
+            <div class="col-content">
+              <div class="voice-text">"${item.voice_text}"</div>
+              <div class="visual-cues"><strong>Visual:</strong> ${item.visual_cues || 'Chưa ghi chú'}</div>
+            </div>
+            <div class="col-media">
+              <div class="badges-row">${audioBadge} ${videoBadge}</div>
+              ${audioPlayerHtml}
+              <div class="card-actions">
+                ${videoActionBtn}
+                <button class="btn btn-secondary btn-sm" onclick="renderSingleAudio('${item.video_id}')">🎙️ Voice</button>
+                <button class="btn btn-secondary btn-sm" onclick="editScript('${item.video_id}')">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteScript('${item.video_id}')">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterVideos() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!q) { renderList(allScripts); return; }
+      renderList(allScripts.filter(s => (s.video_id && s.video_id.toLowerCase().includes(q)) || (s.voice_text && s.voice_text.toLowerCase().includes(q))));
+    }
+
+    // DELTA FORCE CRAWLER FUNCTIONS
+    function setQuickUrl(url) {
+      document.getElementById('gamewithUrl').value = url;
+      crawlWeapon();
+    }
+
+    async function crawlWeapon() {
+      const url = document.getElementById('gamewithUrl').value.trim();
+      const btn = document.getElementById('btn-crawl');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Đang cào dữ liệu...`;
+      showToast('🔍 Đang kết nối tới GameWith.jp...');
+
+      try {
+        const res = await fetch('/api/crawl-weapon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          currentCrawlData = json.data;
+          displayWeaponData(json.data);
+          showToast(`✅ Đã tải thông tin vũ khí: ${json.data.weaponName}`);
+        } else {
+          showToast('❌ Lỗi: ' + json.error, 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối GameWith: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `🔍 Quét & Tóm Tắt Vũ Khí`;
+      }
+    }
+
+    function displayWeaponData(data) {
+      document.getElementById('weaponResultContainer').style.display = 'block';
+      document.getElementById('wpn-name').innerText = data.weaponName;
+      document.getElementById('wpn-source').href = data.url;
+      document.getElementById('wpn-img').src = data.localImageUrl || (data.images && data.images[0]) || '';
+      
+      document.getElementById('wpn-dmg').innerText = data.stats.damage || '-';
+      document.getElementById('wpn-rpm').innerText = data.stats.fireRate || '-';
+      document.getElementById('wpn-armor').innerText = data.stats.armorDamage || '-';
+      document.getElementById('wpn-range').innerText = data.stats.range || '-';
+      document.getElementById('wpn-mag').innerText = `${data.stats.magSize} viên` || '-';
+      document.getElementById('wpn-sound').innerText = data.stats.soundRange || '-';
+
+      document.getElementById('wpn-videoid').value = data.videoId;
+      document.getElementById('wpn-voice-text').value = data.voiceText;
+      document.getElementById('wpn-cues').value = data.visualCues;
+      updateWpnWordCount();
+    }
+
+    function updateWpnWordCount() {
+      const text = document.getElementById('wpn-voice-text').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      const seconds = Math.round((words / 170) * 60);
+      document.getElementById('wpnWordCount').innerText = `${words} từ (~${seconds} giây thoại)`;
+    }
+
+    async function createWeaponVideoNow() {
+      const btn = document.getElementById('btn-create-weapon-video');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Đang render Voice & Video MP4...`;
+      showToast('🚀 Đang chạy dây chuyền sản xuất video cho vũ khí...');
+
+      const payload = {
+        video_id: document.getElementById('wpn-videoid').value.trim(),
+        weapon_name: document.getElementById('wpn-name').innerText,
+        voice_text: document.getElementById('wpn-voice-text').value.trim(),
+        visual_cues: document.getElementById('wpn-cues').value.trim(),
+        voice_name: document.getElementById('wpn-voice-name').value,
+        speed: document.getElementById('wpn-speed').value
+      };
+
+      try {
+        const res = await fetch('/api/create-weapon-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`🎉 Đã tạo thành công Video (${data.size_mb} MB)!`);
+          await loadScripts();
+          // Mở xem ngay video
+          watchVideo(payload.video_id, data.video_url);
+        } else {
+          showToast('❌ Lỗi: ' + data.error, 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi render video: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `🚀 Tạo Video Review Vũ Khí Này Ngay (Audio + Video MP4)`;
+      }
+    }
+
+    // Modal & Video functions
+    function watchVideo(videoId, videoUrl) {
+      document.getElementById('videoModalTitle').innerText = `🎬 Video: ${videoId}`;
+      const player = document.getElementById('playerVideo');
+      player.src = videoUrl;
+      const downloadBtn = document.getElementById('downloadVideoBtn');
+      downloadBtn.href = videoUrl;
+      downloadBtn.download = `${videoId}.mp4`;
+      document.getElementById('videoModal').classList.add('active');
+    }
+    function closeVideoModal() {
+      const player = document.getElementById('playerVideo');
+      player.pause();
+      player.src = '';
+      document.getElementById('videoModal').classList.remove('active');
+    }
+
+    function openModal() { document.getElementById('scriptModal').classList.add('active'); }
+    function closeModal() { document.getElementById('scriptModal').classList.remove('active'); }
+
+    async function saveScript(e) {
+      e.preventDefault();
+      const payload = {
+        video_id: document.getElementById('inputVideoId').value.trim(),
+        voice_name: document.getElementById('inputVoice').value,
+        speed: document.getElementById('inputSpeed').value,
+        voice_text: document.getElementById('inputText').value.trim(),
+        visual_cues: document.getElementById('inputCues').value.trim()
+      };
+      await fetch('/api/scripts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      closeModal();
+      loadScripts();
+    }
+
+    async function deleteScript(videoId) {
+      if (!confirm(`Xóa kịch bản ${videoId}?`)) return;
+      await fetch(`/api/scripts/${videoId}`, { method: 'DELETE' });
+      loadScripts();
+    }
+
+    async function renderSingleAudio(id) {
+      showToast(`🎙️ Đang tạo audio cho ${id}...`);
+      await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ video_id: id, force: true }) });
+      loadScripts();
+    }
+
+    async function renderAllAudio() {
+      showToast(`🚀 Đang chạy Voice AI...`);
+      await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ force: false }) });
+      loadScripts();
+    }
+
+    async function renderSingleVideo(id) {
+      showToast(`🎬 Đang tạo video ${id}...`);
+      await fetch('/api/generate-video', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ video_id: id }) });
+      loadScripts();
+    }
+
+    async function renderAllVideos() {
+      showToast(`🚀 Đang render toàn bộ video...`);
+      await fetch('/api/generate-video', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+      loadScripts();
+    }
+
+    function openGameplayModal() { document.getElementById('gameplayModal').classList.add('active'); loadGameplayFiles(); }
+    function closeGameplayModal() { document.getElementById('gameplayModal').classList.remove('active'); }
+
+    async function loadGameplayFiles() {
+      const res = await fetch('/api/gameplay-files');
+      const data = await res.json();
+      const el = document.getElementById('gameplayFileList');
+      if (data.files && data.files.length > 0) {
+        el.innerHTML = data.files.map(f => `<div style="padding:6px; background:#1e293b; border-radius:6px; margin-bottom:4px;">🎮 ${f}</div>`).join('');
+      } else {
+        el.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Chưa có video gameplay trong assets/gameplay/</p>`;
+      }
+    }
+
+    async function uploadGameplayFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('gameplay', file);
+      await fetch('/api/upload-gameplay', { method: 'POST', body: formData });
+      loadGameplayFiles();
+      showToast('Đã tải lên ' + file.name);
+    }
+
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    loadScripts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "node_tools",
+  "version": "1.0.0",
+  "description": "Video batch production TTS automation tool",
+  "main": "tts_runner.js",
+  "scripts": {
+    "start": "node tts_runner.js",
+    "web": "node server.js",
+    "tts": "node tts_runner.js",
+    "tts:force": "node tts_runner.js --force"
+  },
+  "keywords": [
+    "capcut",
+    "tts",
+    "edge-tts",
+    "automation",
+    "workflow"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "csv-parser": "^3.2.1",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^18.0.9",
+    "express": "^4.21.2",
+    "msedge-tts": "^2.1.1",
+    "multer": "^2.5.0"
+  }
+}
